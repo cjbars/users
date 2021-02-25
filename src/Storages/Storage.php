@@ -13,8 +13,12 @@ interface Storage
 
     public function getAll();
 
+    public function read($conditions);
+
     public function create(Entity $entity): Entity;
 
     public function update($id, Entity $entity): ?Entity;
+
+    public function delete(Entity $entity): void;
 
 }

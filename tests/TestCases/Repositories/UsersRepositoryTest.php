@@ -2,9 +2,11 @@
 
 namespace TestCases\Repositories;
 
-use DateTime;
+use DateInterval;
+use DateTimeImmutable;
 use Exception;
 use PHPUnit\Framework\TestCase;
+use Psr\Log\LoggerInterface;
 use TestCases\Fixtures\InitialStateTrait;
 use User\Entities\Entity;
 use User\Entities\UserEntity;
@@ -20,11 +22,14 @@ class UsersRepositoryTest extends TestCase
 
     private Repository $usersRepository;
 
+    private LoggerInterface $logger;
+
     public function setUp(): void
     {
+        $this->logger = new ArrayLogger();
         $this->usersRepository = new UsersRepository(
             new ArrayStorage($this->getInitialState()),
-            new ArrayLogger()
+            $this->logger
         );
         $this
             ->usersRepository
@@ -54,7 +59,7 @@ class UsersRepositoryTest extends TestCase
         $user = new UserEntity([
             'name' => 'testvalid',
             'email' => 'testvalid@xample.com',
-            'created' => new DateTime()
+            'created' => new DateTimeImmutable()
         ]);
         $this->usersRepository->create($user);
         $this->assertCount(2, $this->usersRepository->getAll());
@@ -112,6 +117,31 @@ class UsersRepositoryTest extends TestCase
         $user->email = $email;
         $updated = $this->usersRepository->update(1, $user);
         $this->assertEquals($updated->email, $email);
+    }
+
+    public function testLoggingAfterUpdate()
+    {
+        $email = 'validEmail@eexample.com';
+        $user = $this->usersRepository->getById(1);
+        $user->email = $email;
+        $this->usersRepository->update(1, $user);
+        $this->assertCount(1, $this->logger->showLog());
+    }
+
+    public function testDeleteAutodated()
+    {
+        $user = $this->usersRepository->getById(1);
+        $this->usersRepository->delete($user);
+        $deletedUser = $this->usersRepository->getById(1);
+        $this->assertNotNull($deletedUser->deleted);
+    }
+
+    public function testDeletedManual()
+    {
+        $this->expectException(ValidationException::class);
+        $user = $this->usersRepository->getById(1);
+        $user->deleted = $user->created->sub(new DateInterval('P1D'));
+        $this->usersRepository->delete($user);
     }
 
     public function invalidNamesProvider(): array

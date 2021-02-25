@@ -2,7 +2,7 @@
 
 namespace User\Entities;
 
-use DateTime;
+use DateTimeImmutable;
 
 class UserEntity extends Entity
 {
@@ -12,11 +12,11 @@ class UserEntity extends Entity
 
     public string $email = '';
 
-    public ?DateTime $deleted = null;
+    public ?DateTimeImmutable $deleted = null;
 
     public ?string $notes = null;
 
-    public DateTime $created;
+    public DateTimeImmutable $created;
 
     /**
      * UserEntity constructor.
@@ -25,10 +25,12 @@ class UserEntity extends Entity
     public function __construct(array $data = [])
     {
         foreach ($data as $key => $value) {
-            $this->$key = $value;
+            if (property_exists($this, $key)) {
+                $this->$key = $value;
+            }
         }
         if (!isset($data['created'])) {
-            $this->created = new DateTime();
+            $this->created = new DateTimeImmutable();
         }
     }
 

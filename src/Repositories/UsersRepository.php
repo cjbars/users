@@ -2,7 +2,10 @@
 
 namespace User\Repositories;
 
+use DateTimeImmutable;
 use Psr\Log\LoggerInterface;
+use User\Entities\Entity;
+use User\Exceptions\ValidationException;
 use User\Storages\Storage;
 use User\Validators\DisallowedDomainsValidator;
 use User\Validators\DisallowedWordsValidator;
@@ -62,6 +65,23 @@ class UsersRepository extends Repository
     {
         $this->disallowedDomains = $disallowedDomains;
         return $this;
+    }
+
+    /**
+     * @param Entity $entity
+     * @throws ValidationException
+     */
+    public function delete(Entity $entity): void
+    {
+        if ($entity->deleted === null) {
+            $entity->deleted = new DateTimeImmutable();
+        } else {
+            if ($entity->deleted <= $entity->created) {
+                throw new ValidationException('Deleted before created');
+            }
+        }
+
+        $this->storage->update($entity->getPrimaryKey(), $entity);
     }
 
 

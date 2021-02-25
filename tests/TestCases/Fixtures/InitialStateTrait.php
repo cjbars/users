@@ -2,7 +2,7 @@
 
 namespace TestCases\Fixtures;
 
-use DateTime;
+use DateTimeImmutable;
 use User\Entities\UserEntity;
 
 trait InitialStateTrait
@@ -16,7 +16,7 @@ trait InitialStateTrait
                         'id' => 1,
                         'name' => 'testtest',
                         'email' => 'test@example.com',
-                        'created' => new DateTime(),
+                        'created' => new DateTimeImmutable(),
                         'deleted' => null,
                         'notes' => 'some text notes'
                     ]))

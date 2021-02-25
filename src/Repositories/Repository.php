@@ -25,20 +25,38 @@ class Repository
         $this->logger = $logger;
     }
 
+    /**
+     * @return array|null
+     */
     public function getAll(): ?array
     {
         return $this->storage->getAll();
     }
 
+    /**
+     * @param int|string $id
+     * @return Entity|null
+     */
     public function getById($id): ?Entity
     {
         return $this->storage->getById($id);
     }
 
     /**
-     * @param $id
      * @param Entity $entity
-     * @return Entity|bool
+     * @return Entity
+     * @throws ValidationException
+     */
+    public function create(Entity $entity): Entity
+    {
+        $this->validate($entity);
+        return $this->storage->create($entity);
+    }
+
+    /**
+     * @param int|string $id
+     * @param Entity $entity
+     * @return Entity|null
      * @throws ValidationException
      */
     public function update($id, Entity $entity): ?Entity
@@ -47,11 +65,16 @@ class Repository
          * @var Entity|bool $oldEntity
          */
         $oldEntity = $this->storage->getById($id);
-        if (!$oldEntity) return false;
+        if (!$oldEntity) return null;
         $this->validate($entity, true);
         $saved = $this->storage->update($oldEntity->getPrimaryKey(), $entity);
         $this->logger->notice('User updated', $saved->toArray());
         return $saved;
+    }
+
+    public function delete(Entity $entity)
+    {
+        $this->storage->delete($entity);
     }
 
     /**
@@ -79,14 +102,4 @@ class Repository
         return [];
     }
 
-    /**
-     * @param Entity $entity
-     * @return Entity
-     * @throws ValidationException
-     */
-    public function create(Entity $entity): Entity
-    {
-        $this->validate($entity);
-        return $this->storage->create($entity);
-    }
 }
