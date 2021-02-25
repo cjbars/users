@@ -3,31 +3,24 @@
 namespace User\Storages;
 
 
-use DateTime;
 use User\Entities\Entity;
 
 class ArrayStorage implements Storage
 {
 
-    private array $data = [];
+    private array $data;
 
 
-    public function __construct(array $initialState)
+    public function __construct(array $initialState = [])
     {
         $this->data = $initialState;
     }
 
-    public function save(Entity $entity): Entity
-    {
-        if ($entity->getPrimaryKey()) {
-            return $this->update($entity);
-        }
-        return $this->create($entity);
-    }
 
-    public function update(Entity $entity): Entity
+    public function update($id, Entity $entity): ?Entity
     {
-        $this->data[$entity->getPrimaryKey()] = $entity;
+        if (!isset($this->data[$id])) return null;
+        $this->data[$id] = serialize($entity);
         return $entity;
     }
 
@@ -35,19 +28,20 @@ class ArrayStorage implements Storage
     {
         $key = count($this->data) + 1;
         $entity->setPrimaryKey($key);
-        $this->data[$key] = (array)$entity;
+        $this->data[$key] = serialize($entity);
         return $entity;
     }
 
-    public function getById($id): ?array
+    public function getById($id): ?Entity
     {
-        return isset($this->data[$id]) ? $this->data[$id] : null;
+        return isset($this->data[$id]) ? unserialize($this->data[$id]) : null;
     }
 
     public function getBy($field, $value): array
     {
         return array_filter($this->data, function ($item) use ($field, $value) {
-            return $item[$field] == $value;
+            $entity = unserialize($item);
+            return isset($entity->$field) ? $entity->$field === $value : false;
         });
     }
 
@@ -55,12 +49,5 @@ class ArrayStorage implements Storage
     {
         return $this->data;
     }
-
-    public function delete(Entity $entity): void
-    {
-        $entity->deleted = new DateTime();
-        $this->update($entity);
-    }
-
 
 }

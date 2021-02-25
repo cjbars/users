@@ -27,6 +27,9 @@ class UserEntity extends Entity
         foreach ($data as $key => $value) {
             $this->$key = $value;
         }
+        if (!isset($data['created'])) {
+            $this->created = new DateTime();
+        }
     }
 
     public function setPrimaryKey($key)

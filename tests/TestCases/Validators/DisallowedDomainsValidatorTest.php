@@ -1,8 +1,9 @@
 <?php
 
-namespace User\Validators;
+namespace TestCases\Validators;
 
 use PHPUnit\Framework\TestCase;
+use User\Validators\DisallowedDomainsValidator;
 
 class DisallowedDomainsValidatorTest extends TestCase
 {
@@ -17,6 +18,7 @@ class DisallowedDomainsValidatorTest extends TestCase
     public function testIsValid($domain, $expected)
     {
         $validator = new DisallowedDomainsValidator(['domains' => $this->disallowed]);
+
         $this->assertEquals($expected, $validator->isValid($domain));
     }
 

@@ -23,7 +23,7 @@ class LengthValidator implements Validator
         }
     }
 
-    public function isValid($field): bool
+    public function isValid($field, $isUpdate = false): bool
     {
         $length = mb_strlen((string)$field);
         return $length >= $this->min && $length <= $this->max;

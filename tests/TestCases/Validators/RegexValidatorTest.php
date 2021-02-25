@@ -1,8 +1,9 @@
 <?php
 
-namespace User\Validators;
+namespace TestCases\Validators;
 
 use PHPUnit\Framework\TestCase;
+use User\Validators\RegexValidator;
 
 class RegexValidatorTest extends TestCase
 {

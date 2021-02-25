@@ -1,9 +1,11 @@
 <?php
 
-namespace Repositories;
+namespace TestCases\Repositories;
 
+use DateTime;
 use Exception;
 use PHPUnit\Framework\TestCase;
+use TestCases\Fixtures\InitialStateTrait;
 use User\Entities\Entity;
 use User\Entities\UserEntity;
 use User\Exceptions\ValidationException;
@@ -14,6 +16,8 @@ use User\Storages\ArrayStorage;
 
 class UsersRepositoryTest extends TestCase
 {
+    use InitialStateTrait;
+
     private Repository $usersRepository;
 
     public function setUp(): void
@@ -25,8 +29,7 @@ class UsersRepositoryTest extends TestCase
         $this
             ->usersRepository
             ->setDisallowedNames(['disallowed', 'wrongword'])
-            ->setDisallowedDomains(['bad.com', 'ignore.ru'])
-        ;
+            ->setDisallowedDomains(['bad.com', 'ignore.ru']);
 
     }
 
@@ -43,25 +46,23 @@ class UsersRepositoryTest extends TestCase
         $this->assertNull($user);
     }
 
+    /**
+     * @throws ValidationException
+     */
     public function testAddValidUser()
     {
         $user = new UserEntity([
             'name' => 'testvalid',
             'email' => 'testvalid@xample.com',
-            'created' => new \DateTime()
+            'created' => new DateTime()
         ]);
-        try {
-            $this->usersRepository->create($user);
-        } catch (Exception $e) {
-            var_dump($e->getMessage());
-        }
+        $this->usersRepository->create($user);
         $this->assertCount(2, $this->usersRepository->getAll());
     }
 
     /**
      * @dataProvider invalidNamesProvider
      * @param $name
-     * @throws Exception
      */
     public function testAddWithBadName($name)
     {
@@ -71,6 +72,7 @@ class UsersRepositoryTest extends TestCase
             'email' => 'valid@example.com'
         ]);
         $this->usersRepository->create($user);
+
     }
 
     /**
@@ -88,20 +90,29 @@ class UsersRepositoryTest extends TestCase
         $this->usersRepository->create($user);
     }
 
-    public function testUpdateValidUser()
+    /**
+     * @throws ValidationException
+     */
+    public function testUpdateNameOfValidUser()
     {
+        $name = 'updatedname';
         $user = $this->usersRepository->getById(1);
-        $user->name = 'updatedname';
-        try {
-            $this->usersRepository->save($user);
-        } catch (Exception $e) {
-            print_r($e->getMessage());
-        }
-        print_r($this->usersRepository->getAll());
+        $user->name = $name;
+        $updated = $this->usersRepository->update(1, $user);
+        $this->assertEquals($updated->name, $name);
     }
 
-
-
+    /**
+     * @throws ValidationException
+     */
+    public function testUpdateEmailOfValidUser()
+    {
+        $email = 'validEmail@eexample.com';
+        $user = $this->usersRepository->getById(1);
+        $user->email = $email;
+        $updated = $this->usersRepository->update(1, $user);
+        $this->assertEquals($updated->email, $email);
+    }
 
     public function invalidNamesProvider(): array
     {
@@ -138,17 +149,5 @@ class UsersRepositoryTest extends TestCase
         ];
     }
 
-    public function getInitialState(): array
-    {
-        return [
-            1 => ['id' => 1,
-                'name' => 'testtest',
-                'email' => 'test@example.com',
-                'created' => new \DateTime(),
-                'deleted' => null,
-                'notes' => 'some text notes'
-            ]
-        ];
-    }
 
 }

@@ -11,10 +11,9 @@ class EmailValidator implements Validator
     {
     }
 
-    public function isValid($field): bool
+    public function isValid($field, $isUpdate = false): bool
     {
-        // @TODO данный метод сработает только на латинских адресах
-        // намеренно упрощено
+        // данный метод сработает только на латинских адресах, намеренно упрощено
         return filter_var($field, FILTER_VALIDATE_EMAIL) !== false;
     }
 

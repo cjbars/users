@@ -1,7 +1,8 @@
 <?php
-namespace User\Validators;
+namespace TestCases\Validators;
 
 use PHPUnit\Framework\TestCase;
+use User\Validators\LengthValidator;
 
 class LengthValidatorTest extends TestCase
 {

@@ -2,9 +2,8 @@
 
 namespace User\Repositories;
 
-use Exception;
-use User\Entities\Entity;
-use User\Entities\UserEntity;
+use Psr\Log\LoggerInterface;
+use User\Storages\Storage;
 use User\Validators\DisallowedDomainsValidator;
 use User\Validators\DisallowedWordsValidator;
 use User\Validators\EmailValidator;
@@ -22,36 +21,27 @@ class UsersRepository extends Repository
 
     private array $disallowedDomains = [];
 
-    /**
-     * @return array
-     * @throws Exception
-     */
+    public function __construct(Storage $storage, LoggerInterface $logger)
+    {
+        parent::__construct($storage, $logger);
+    }
+
     public function rules(): array
     {
         return [
             'name' => [
-                new UniqueValidator(['fieldName' => 'name', 'storage' => $this->storage]),
                 new LengthValidator(['min' => 8, 'max' => 256]),
+                new UniqueValidator(['fieldName' => 'name', 'storage' => $this->storage]),
                 new RegexValidator(['regex' => RegexValidator::ALPHA_NUM]),
                 new DisallowedWordsValidator(['words' => $this->disallowedNames])
             ],
             'email' => [
+                new LengthValidator(),
                 new EmailValidator(),
                 new UniqueValidator(['fieldName' => 'email', 'storage' => $this->storage]),
-                new LengthValidator(),
                 new DisallowedDomainsValidator(['domains' => $this->disallowedDomains])
-            ]
+            ],
         ];
-    }
-
-
-    public function getById($id): ?UserEntity
-    {
-        $data = $this->storage->getById($id);
-        if($data){
-            return new UserEntity($data);
-        }
-        return null;
     }
 
     /**

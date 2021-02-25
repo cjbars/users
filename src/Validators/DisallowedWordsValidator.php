@@ -19,7 +19,7 @@ class DisallowedWordsValidator implements Validator
         }
     }
 
-    public function isValid($field): bool
+    public function isValid($field, $isUpdate = false): bool
     {
         return !in_array($field, $this->words);
     }

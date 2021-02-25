@@ -4,7 +4,6 @@
 namespace User\Validators;
 
 
-use User\Entities\Entity;
 use User\Storages\Storage;
 
 class UniqueValidator implements Validator
@@ -18,16 +17,10 @@ class UniqueValidator implements Validator
         $this->fieldName = $options['fieldName'];
     }
 
-    public function isValid($field, $options = []): bool
+    public function isValid($field = null, $isUpdate = false): bool
     {
         $entities = $this->storage->getBy($this->fieldName, $field);
-
-        if(isset($options['primaryKey'])){
-            $entities = array_filter($entities, function ($entity) use ($options){
-                return $entity->getPrimaryKey() != $options['primaryKey'];
-            });
-        }
-        return empty($entities);
+        return $isUpdate ? count($entities) <= 1 : empty($entities);
     }
 
     public function getErrorMessage(): string

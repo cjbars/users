@@ -1,9 +1,10 @@
 <?php
 
-namespace Entities;
+namespace TestCases\Entities;
 
-use User\Entities\UserEntity;
+use DateTime;
 use PHPUnit\Framework\TestCase;
+use User\Entities\UserEntity;
 
 class UserEntityTest extends TestCase
 {
@@ -14,7 +15,7 @@ class UserEntityTest extends TestCase
     {
         $name = 'test';
         $email = 'test@example.com';
-        $created = new \DateTime();
+        $created = new DateTime();
         $notes = 'some notes text';
 
         $this->user = new UserEntity([
@@ -29,7 +30,7 @@ class UserEntityTest extends TestCase
     {
         $name = 'test';
         $email = 'test@example.com';
-        $created = new \DateTime();
+        $created = new DateTime();
         $notes = 'some notes text';
 
         $user = new UserEntity([

@@ -19,7 +19,7 @@ class DisallowedDomainsValidator implements Validator
         }
     }
 
-    public function isValid($field): bool
+    public function isValid($field, $isUpdate = false): bool
     {
         $email = explode('@', $field);
         return !in_array($email[1], $this->domains);

@@ -22,7 +22,7 @@ class RegexValidator implements Validator
         $this->regex = $options['regex'];
     }
 
-    public function isValid($field): bool
+    public function isValid($field, $isUpdate = false): bool
     {
         return preg_match($this->regex, (string)$field) == 1;
     }

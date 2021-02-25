@@ -1,12 +1,17 @@
 <?php
 
-namespace User\Validators;
+namespace TestCases\Validators;
 
 use PHPUnit\Framework\TestCase;
+use TestCases\Fixtures\initialStateTrait;
 use User\Storages\ArrayStorage;
+use User\Validators\UniqueValidator;
 
 class UniqueValidatorTest extends TestCase
 {
+
+    use InitialStateTrait;
+
     /**
      * @dataProvider dataProvider
      * @param $string
@@ -16,21 +21,9 @@ class UniqueValidatorTest extends TestCase
     {
         $storage = new ArrayStorage($this->getInitialState());
         $validator = new UniqueValidator(['fieldName' => 'name', 'storage' => $storage]);
-        $this->assertEquals($expected, $validator->isValid($string));
+        $this->assertEquals($expected, $validator->isValid($string, false));
     }
 
-    public function getInitialState(): array
-    {
-        return [
-            1 => ['id' => 1,
-                'name' => 'testtest',
-                'email' => 'test@example.com',
-                'created' => new \DateTime(),
-                'deleted' => null,
-                'notes' => 'some text notes'
-            ]
-        ];
-    }
 
     public function dataProvider(): array
     {

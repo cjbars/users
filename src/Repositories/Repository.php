@@ -3,14 +3,12 @@
 namespace User\Repositories;
 
 
-use Exception;
 use Psr\Log\LoggerInterface;
 use User\Entities\Entity;
 use User\Exceptions\ValidationException;
 use User\Storages\Storage;
-use User\Validators\Validator;
 
-abstract class Repository
+class Repository
 {
     protected Storage $storage;
 
@@ -32,48 +30,50 @@ abstract class Repository
         return $this->storage->getAll();
     }
 
-    abstract public function getById($id): ?Entity;
+    public function getById($id): ?Entity
+    {
+        return $this->storage->getById($id);
+    }
 
     /**
+     * @param $id
      * @param Entity $entity
-     * @return bool
-     * @throws Exception
+     * @return Entity|bool
+     * @throws ValidationException
      */
-    public function save(Entity $entity): ?bool
+    public function update($id, Entity $entity): ?Entity
     {
-        $this->validate($entity, ['primaryKey' => $entity->getPrimaryKey()]);
-        $saved = $this->storage->save($entity);
-        $this->logger->notice('User saved', $saved->toArray());
-        return true;
+        /**
+         * @var Entity|bool $oldEntity
+         */
+        $oldEntity = $this->storage->getById($id);
+        if (!$oldEntity) return false;
+        $this->validate($entity, true);
+        $saved = $this->storage->update($oldEntity->getPrimaryKey(), $entity);
+        $this->logger->notice('User updated', $saved->toArray());
+        return $saved;
     }
 
     /**
      * @param Entity $entity
-     * @param array $options
+     * @param bool $isUpdate
      * @throws ValidationException
-     * @throws Exception
      */
-    public function validate(Entity $entity, $options = []): void
+    public function validate(Entity $entity, $isUpdate = false): void
     {
-        foreach ($this->rules() as $field => $rules) {
-
+        foreach ($this->rules() as $field => $validators) {
             if (!property_exists($entity, $field)) {
-                throw new Exception('Property no exists in entity');
+                throw new ValidationException('Property no exists in entity');
             }
-            /**
-             * @var Validator $rule
-             */
-            foreach ($rules as $rule) {
-                if (!$rule->isValid($entity->$field, $options)) {
-                    throw new ValidationException($rule->getErrorMessage());
+
+            foreach ($validators as $validator) {
+                if (!$validator->isValid($entity->$field, $isUpdate)) {
+                    throw new ValidationException($validator->getErrorMessage());
                 }
             }
         }
     }
 
-    /**
-     * @return array
-     */
     public function rules(): array
     {
         return [];
@@ -82,7 +82,7 @@ abstract class Repository
     /**
      * @param Entity $entity
      * @return Entity
-     * @throws Exception
+     * @throws ValidationException
      */
     public function create(Entity $entity): Entity
     {
