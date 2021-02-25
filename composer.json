@@ -1,0 +1,23 @@
+{
+    "name": "denis/user",
+    "description": "Users domain class",
+    "type": "library",
+    "authors": [
+        {
+            "name": "Denis Pro",
+            "email": "denis@cjbars.ru"
+        }
+    ],
+    "minimum-stability": "stable",
+    "require-dev": {
+        "phpunit/phpunit": "^9.5"
+    },
+    "autoload": {
+        "psr-4": {
+            "User\\": "src/"
+        }
+    },
+    "require": {
+        "psr/log": "^1.1"
+    }
+}
